@@ -63,7 +63,7 @@ func NewWebSocketChannel(cfg config.WebSocketConfig, mb *bus.MessageBus) (*WebSo
 		"websocket",
 		cfg,
 		mb,
-		[]string(cfg.AllowFrom),
+		cfg.AllowFrom,
 		channels.WithReasoningChannelID(cfg.ReasoningChannelID),
 	)
 	ch := &WebSocketChannel{
@@ -76,7 +76,8 @@ func NewWebSocketChannel(cfg config.WebSocketConfig, mb *bus.MessageBus) (*WebSo
 
 // connect dials the WebSocket server and sends the auth handshake.
 func (c *WebSocketChannel) connect() error {
-	dialer := websocket.Dialer{HandshakeTimeout: 10 * time.Second}
+	dialer := *websocket.DefaultDialer
+	dialer.HandshakeTimeout = 10 * time.Second
 	conn, resp, err := dialer.DialContext(c.ctx, c.config.WSUrl, nil)
 	if resp != nil && resp.Body != nil {
 		resp.Body.Close()
